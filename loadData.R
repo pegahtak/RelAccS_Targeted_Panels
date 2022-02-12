@@ -1,6 +1,6 @@
 ### load data and collapse samples
 library(readxl)
-
+library(purrr)
 ### read TCGA pan caner data set 
 ### obtained form https://gdc.cancer.gov/about-data/publications/ATACseq-AWG
 ### download link: https://api.gdc.cancer.gov/data/d6e5358d-491c-4776-8043-b5e49b96706e
@@ -12,4 +12,21 @@ colnames(sequencing_stat)<- sequencing_stat[37, ]
 sequencing_stat<- sequencing_stat[ -1:-37, ]
 
 ### normalize to total library size
-data<- (data/ as.numeric(sequencing_stat$Final_DeDup_reads))
+data<- 1000000*(data/ as.numeric(sequencing_stat$Final_DeDup_reads))
+
+### collapse technical replicates
+s_names<- map(strsplit(colnames(data) , split = "_L" ),1)
+s_names<- unlist(s_names)
+samples<- as.data.frame(table(s_names))
+set <- matrix(0 , nrow = nrow(data) , ncol= nrow(samples))
+colnames(set)<- samples$s_names
+for ( i in 1:nrow(samples))
+{
+  ind<- which(s_names==samples$s_names[i])
+  t<-data[,ind]
+  if(length(ind)>1)
+    set[, i]<-rowMeans(t)
+  else
+    set[ , i]<- t
+}
+

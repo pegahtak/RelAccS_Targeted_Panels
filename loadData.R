@@ -18,15 +18,16 @@ data<- 1000000*(data/ as.numeric(sequencing_stat$Final_DeDup_reads))
 s_names<- map(strsplit(colnames(data) , split = "_L" ),1)
 s_names<- unlist(s_names)
 samples<- as.data.frame(table(s_names))
-set <- matrix(0 , nrow = nrow(data) , ncol= nrow(samples))
+n.set <- matrix(0 , nrow = nrow(data) , ncol= nrow(samples))
 colnames(set)<- samples$s_names
 for ( i in 1:nrow(samples))
 {
   ind<- which(s_names==samples$s_names[i])
   t<-data[,ind]
   if(length(ind)>1)
-    set[, i]<-rowMeans(t)
+    n.set[, i]<-rowMeans(t)
   else
-    set[ , i]<- t
+    n.set[ , i]<- t
 }
-
+rownames(n.set)<- rownames(data)
+rm(data)

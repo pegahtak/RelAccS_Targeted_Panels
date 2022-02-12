@@ -19,7 +19,7 @@ s_names<- map(strsplit(colnames(data) , split = "_L" ),1)
 s_names<- unlist(s_names)
 samples<- as.data.frame(table(s_names))
 n.set <- matrix(0 , nrow = nrow(data) , ncol= nrow(samples))
-colnames(set)<- samples$s_names
+colnames(n.set)<- samples$s_names
 for ( i in 1:nrow(samples))
 {
   ind<- which(s_names==samples$s_names[i])
@@ -31,3 +31,4 @@ for ( i in 1:nrow(samples))
 }
 rownames(n.set)<- rownames(data)
 rm(data)
+n.set<- t(n.set)

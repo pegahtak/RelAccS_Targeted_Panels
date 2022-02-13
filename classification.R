@@ -26,7 +26,6 @@ cv = lapply(folds, function(x) {
   classifierRF<-randomForest(training_fold[,-ind_response], factor(Y_training_fold , c(0,1)),
                              xtest=test_fold[ , -ind_response] , ytest=as.factor(test_fold$response) ,
                              ntree=1000 , importance = TRUE)
-  
   prr_RF<- prediction(classifierRF$test$votes[,2], test_fold$response)
   cmRF<- classifierRF$test$confusion
   accuracyRF<- ((cmRF[1,1]+cmRF[2,2])/(cmRF[1,1]+cmRF[1,2]+cmRF[2,1]+cmRF[2,2]) )
@@ -45,10 +44,9 @@ cv = lapply(folds, function(x) {
   cmSVM<- table(Y_test_fold , res_SVM)
   accuracySVM<- ((cmSVM[1,1]+cmSVM[2,2])/(cmSVM[1,1]+cmSVM[1,2]+cmSVM[2,1]+cmSVM[2+2]))
   
+  
   classifierLASSO<- glmnet(as.matrix(training_fold[, -ind_response]) , as.numeric(Y_training_fold),
                            alpha=1 , family = "binomial"  )  #lambda = cv.lasso$lambda.min
-  
- 
   LASSOCoefs<- coef(classifierLASSO)[ , 100]
   LASSOCoefs<- LASSOCoefs[-1]# remove intercept
   LASSO.features<- rownames(LASSOCoefs[which(LASSOCoefs!=0)])
@@ -59,12 +57,7 @@ cv = lapply(folds, function(x) {
   accuracyLASSO<- ( (cmLASSO[1,1]+cmLASSO[2,2])/(cmLASSO[1,1]+cmLASSO[1,2]+cmLASSO[2,1]+cmLASSO[2,2]))
   misclassifiedLASSO<- names(LASSO.prr[which(lasso.pr.class!=Y_test_fold)])
   
-  # Boost.model<- xgboost(data=as.matrix(training_fold[ , -ind_response]) , label = Y_training_fold , n.trees=1000
-  #                      , nrounds = 5000 , verbose = 0  )
-  # boost.importance<- xgb.importance(model= Boost.model)
-  # 
-  # GBMModel <- train(response~.,data = training_fold,
-  #                   method = "gbm",distribution = "multinomial", verbose = F, n.trees=100)
+
   
   boost.model=gbm(response~.,data = training_fold,n.trees=500, 
                   distribution = "bernoulli", verbose = F, interaction.depth = 1   ) #interaction.depth=4,cv.folds = 5, shrinkage = 0.01)

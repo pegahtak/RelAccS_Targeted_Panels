@@ -4,7 +4,7 @@ suppressMessages(library(plyranges))
 peaks<- as_granges(Pan_peaks[Pan_peaks$name%in%f2_features , 1:3] , seqnames= seqnames , start=start , end=end)
 
 source("load_rawBloodData.R")
-blood1<- loadBlood()
+blood1<- load_rawBlood()
 colnames(blood1)<- Pan_peaks$name
 Neutrophil_counts1<- blood1[1:8 ,f2_features ]
 PBMC_counts1<- blood1[ 9:259 ,f2_features ]

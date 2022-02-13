@@ -6,6 +6,7 @@ library(purrr)
 ### download link: https://api.gdc.cancer.gov/data/d6e5358d-491c-4776-8043-b5e49b96706e
 data<- readRDS("data/TCGA_panCancer.rds") 
 data<- data[ , -1:-7]
+raw_data<- t(data)
 
 sequencing_stat<- read_excel("TCGA-ATAC_DataS1_DonorsAndStats_v4.xlsx" , sheet = 3)
 colnames(sequencing_stat)<- sequencing_stat[37, ]

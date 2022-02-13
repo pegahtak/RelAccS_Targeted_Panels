@@ -16,8 +16,8 @@ source("BRCA_subTypes.R") ## gets subTypes of breast cancer
 
 ### size of cancer types 
 cancerGroups<- as.data.frame(table(cancerTypes))
-write.table(cancerGroups ,"cancerTypesInfo.txt" , sep="\t" , row.names = FALSE
-            , quote = FALSE)
+#write.table(cancerGroups ,"cancerTypesInfo.txt" , sep="\t" , row.names = FALSE
+#            , quote = FALSE)
 
 IDs<- rep(0 , nrow(set))
 for ( j in 1:length(cancerGroups))

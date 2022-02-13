@@ -8,7 +8,7 @@ suppressMessages(library(gtools))
 
 source("load_BloodData.R")
 blood<- loadBlood()
-Pan_peaks<- fread("TCGA-ATAC_PanCancer_PeakSet.txt")
+Pan_peaks<- fread("data/TCGA-ATAC_PanCancer_PeakSet.txt")
 colnames(blood)<- Pan_peaks$name
 Neutrophil_counts<- blood[1:8 , ]
 PBMC_counts<- blood[ 9:259 , ]
@@ -26,7 +26,7 @@ PBMC_counts<- my_coll(PBMC_counts , "PBMC")
 Neut_mean_ratio<- ((colMeans(set[cancerCaseID , ])+1)/(colMeans(Neutrophil_counts)+1) )
 PBMC_mean_ratio<- ((colMeans(set[cancerCaseID , ])+1)/(colMeans(PBMC_counts)+1) )
 
-### we assumed that cfDNA drived from Netrophils consist 2/3 of whole plasma cfDNA
+### we assumed that cfDNA derived from Netrophils consist 2/3 of whole plasma cfDNA
 blood_mean<-(2*(colMeans(Neutrophil_counts)+1) +(colMeans(PBMC_counts)+1)/3) 
 blood_ratio<- ((colMeans(set[cancerCaseID , ])+1) /blood_mean)
 
@@ -65,8 +65,8 @@ f1_coor$mean_ratio_blood<- blood_ratio[f1.features]
 f1_coor$log2FC_blood<- log2FC_blood[ f1.features]
 
 write.table(f1_coor , paste(Cancer, "/f1_features.txt" , sep=""), quote = FALSE)
-write.csv(f1_coor , file=paste(Cancer , "/f1_features.csv" , sep="")
-          , append = FALSE )
+write.xlsx(f1_coor , file=paste(Cancer , "/f1_features.xlsx" , sep="")
+          , append = FALSE , row.names = F)
 
 set <- set[ , f1.features]
 

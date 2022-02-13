@@ -10,5 +10,5 @@ f2_coor<- f1_coor[!overlapsAny(G.f1_coor ,G.blood , maxgap=-1), ]
 f2_features<- f2_coor$name
 
 set<- set[ , f2_features]
-write.csv(f2_coor , file= paste(Cancer, "/f2_features.csv", sep="")
-          , append = FALSE )
+write.xlsx(f2_coor , file= paste(Cancer, "/f2_features.xlsx", sep="")
+          , append = FALSE  , row.names = F)

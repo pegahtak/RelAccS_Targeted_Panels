@@ -14,30 +14,16 @@ set=n.set
 set<- as.data.frame(n.set)
 source("BRCA_subTypes.R") ## gets subTypes of breast cancer 
 
-cancerGroups<- unique(cancerTypes)
-IDs<- rep(0 , nrow(set))
-for ( j in 1:length(cancerGroups))
-{
-  IDs[which(cancerTypes==cancerGroups[j])]<-j
-}
-
-
-
-### size of each cancer 
-cancerGroups<- data.frame(cancerGroups , rep( 0 , length(cancerGroups)))
-for ( j in 1: dim(cancerGroups)[1])
-  cancerGroups[j,2]<- length(which(cancerTypes==cancerGroups[j,1]))
+### size of cancer types 
+cancerGroups<- as.data.frame(table(cancerTypes))
 write.table(cancerGroups ,"cancerTypesInfo.txt" , sep="\t" , row.names = FALSE
             , quote = FALSE)
 
 cases<- c("BRCA", "COAD", "KIDNEY", "LIHC" ,"LUNG" , "PRAD", "STAD" )
 
-res<- ls()
-#source("loadRawdata.R")
 for (  i in 1:length(cases))
 {
-  #all_va<-ls()
-  #rm(list = setdiff(all_va , res))
+ 
   set=as.data.frame(n.set)
   ### choose cancer Type ( choose i )
   Cancer=cases[i]
@@ -79,8 +65,6 @@ for (  i in 1:length(cases))
   
   system(paste( "mkdir " , Cancer , sep=""))
   source("logFC_Filter.R")
-  #source("DEseq.R")
-  #source("HUVEC_Filter.R")
   source("bloodFilter.R")
   source("DiffBind.R")  
   source("classification.R")

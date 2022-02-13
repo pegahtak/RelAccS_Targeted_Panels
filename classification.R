@@ -4,6 +4,7 @@ suppressMessages( library(glmnet))
 suppressMessages(library(ROCR))
 suppressMessages(library(gbm))
 suppressMessages(library(xgboost))
+suppressMessages(library(caret))
 
 set$response<-Cancer_response
 set$id<- IDs

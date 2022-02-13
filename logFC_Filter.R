@@ -37,6 +37,7 @@ log2FC_Neut<-log2(Neut_mean_ratio)
 log2FC_PBMC<- log2(PBMC_mean_ratio)
 log2FC_blood<- log2(blood_ratio)
 
+### filter1 
 f1.features<- (names(log2FC_blood))[ which(log2FC_blood >=1.5)]
 
 
@@ -67,6 +68,5 @@ write.table(f1_coor , paste(Cancer, "/f1_features.txt" , sep=""), quote = FALSE)
 write.csv(f1_coor , file=paste(Cancer , "/f1_features.csv" , sep="")
           , append = FALSE )
 
-#set<- as.data.frame(set)
 set <- set[ , f1.features]
 

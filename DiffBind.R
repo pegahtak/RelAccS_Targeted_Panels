@@ -137,6 +137,7 @@ rm(DBA_res)
 rm(DBA2)
 rm(G.Diff)
 rm(G.Diff2)
+system("rm SampleSheet.csv")
 
 write.csv(f3_coor , file=paste(Cancer ,Panel_Type, "/f3_features.csv" , sep="")
           , append = FALSE )

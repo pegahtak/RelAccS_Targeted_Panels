@@ -1,9 +1,9 @@
-
 suppressMessages(library(e1071))
 suppressMessages(library(randomForest))
 suppressMessages( library(glmnet))
 suppressMessages(library(ROCR))
 suppressMessages(library(gbm))
+suppressMessages(library(xgboost))
 
 set$response<-Cancer_response
 set$id<- IDs
@@ -11,7 +11,7 @@ ind_response<- which(colnames(set)=="response")
 ind_id<- which(colnames(set)=="id")
 
 set.seed(1234)
-folds = createFolds(set$response, k = 5)### to get even distribution use set$id if samples are too few use set$response 
+folds = createFolds(set$id, k = 5)### to get even distribution use set$id if samples are too few use set$response 
 cv = lapply(folds, function(x) {
   training_fold = set[-x, ]
   test_fold =set[x, ]
@@ -26,8 +26,7 @@ cv = lapply(folds, function(x) {
   classifierRF<-randomForest(training_fold[,-ind_response], factor(Y_training_fold , c(0,1)),
                              xtest=test_fold[ , -ind_response] , ytest=as.factor(test_fold$response) ,
                              ntree=1000 , importance = TRUE)
-  #rf.p1<- predict(classifierRF , newdata=test_fold[ , -ind_response] , type="prob")
-  #prr_RF<- prediction(unlist(rf.p1)[, 2], test_fold$response)
+  
   prr_RF<- prediction(classifierRF$test$votes[,2], test_fold$response)
   cmRF<- classifierRF$test$confusion
   accuracyRF<- ((cmRF[1,1]+cmRF[2,2])/(cmRF[1,1]+cmRF[1,2]+cmRF[2,1]+cmRF[2,2]) )
@@ -40,34 +39,22 @@ cv = lapply(folds, function(x) {
                     , kernel="linear")
   
   probsSVM<- attr(res_SVM, "probabilities")
-  # res_SVM[res_SVM>=0.5]<- 1
-  # res_SVM[res_SVM<0.5]<- 0
   SVM_vars<- coef(classifierSVM)
   SVM_vars<- SVM_vars[-1] ### remove intercept
   misclassifiedSVM <-names(res_SVM[res_SVM[1:length(res_SVM)]!=test_fold$response  ])
   cmSVM<- table(Y_test_fold , res_SVM)
   accuracySVM<- ((cmSVM[1,1]+cmSVM[2,2])/(cmSVM[1,1]+cmSVM[1,2]+cmSVM[2,1]+cmSVM[2+2]))
-  #p1SVM<- prediction(res_SVM , Y_test_fold)
-  
-  
-  # cv.lasso<- cv.glmnet(as.matrix(training_fold[, -ind_response]) , as.numeric(training_fold$response),
-  #                      alpha=1 , family = "binomial" , parallel = TRUE)
   
   classifierLASSO<- glmnet(as.matrix(training_fold[, -ind_response]) , as.numeric(Y_training_fold),
                            alpha=1 , family = "binomial"  )  #lambda = cv.lasso$lambda.min
   
-  # cv.lasso<- cv.glmnet(as.matrix(training_fold[, -ind_response]) , as.numeric(Y_training_fold),
-  #                      alpha=1 , family = "binomial" , parallel = TRUE)
+ 
   LASSOCoefs<- coef(classifierLASSO)[ , 100]
   LASSOCoefs<- LASSOCoefs[-1]# remove intercept
   LASSO.features<- rownames(LASSOCoefs[which(LASSOCoefs!=0)])
   LASSO.prr<- predict(classifierLASSO, newx = as.matrix(test_fold[ , -ind_response]), type="response")
   LASSO.prr<- LASSO.prr[,100 ]
   lasso.pr.class<- LASSO.prr
-  #lasso.pr.class[LASSO.prr>= 0.5]<-1
-  #lasso.pr.class[LASSO.prr< 0.5]<-0
-  
-  #cmLASSO<- table(Y_test_fold , lasso.pr.class)
   cmLASSO<- ModelMetrics::confusionMatrix(Y_test_fold , lasso.pr.class , cutoff = 0.5)
   accuracyLASSO<- ( (cmLASSO[1,1]+cmLASSO[2,2])/(cmLASSO[1,1]+cmLASSO[1,2]+cmLASSO[2,1]+cmLASSO[2,2]))
   misclassifiedLASSO<- names(LASSO.prr[which(lasso.pr.class!=Y_test_fold)])
@@ -90,15 +77,6 @@ cv = lapply(folds, function(x) {
   MisclassifiedBoost<-Names_test[ which(Y_test_fold!=b.p)]
   accuracy.Boost<- ((boost.cm[1,1]+boost.cm[2,2])/(boost.cm[1,1]+boost.cm[1,2]+boost.cm[2,1]+boost.cm[2,2]))
   
-  #Boost.AUC<-gbm.roc.area(Y_test_fold, boost.predict)
-  #plot(roc( Y_test_fold , boost.predict))
-  # Boost.pred<- predict(Boost.model , newdata=as.matrix( test_fold[ , -ind_response]))
-  # Boost.y.pred<-( Boost.pred>=0.5 )
-  # cmBoost<- table(Y_test_fold ,Boost.y.pred )
-  # accuracyBoost<-  ( (cmBoost[1,1]+cmBoost[2,2])/(cmBoost[1,1]+cmBoost[1,2]+cmBoost[2,1]+cmBoost[2,2]))
-  # misclassifiedBoost.i<-which(Y_test_fold!=Boost.y.pred)
-  # misclassifiedBoost<- rownames(test_fold[misclassifiedBoost.i  , ])
-  # Boost.importance<- xgb.importance(model=Boost.model , feature_names = colnames(training_fold))
   
   out <- list( accuracyRF, cmRF , classifierRF$importance, prr_RF , classifierRF$test$votes 
                , misclassifiedRF , accuracySVM , cmSVM  , res_SVM , probsSVM , misclassifiedSVM , SVM_vars
@@ -121,7 +99,6 @@ source("report.R")
 acc<-report(Cancer , cv)
 
 ### compare models and choose the best one 
-
 
 accuracyRF <- acc$accuracyRF
 accuracySVM<- acc$accuracySVM
@@ -236,7 +213,6 @@ write.xlsx(f4_coor , file= paste(Cancer, "/f4_features.xlsx", sep="")
            , sheetName = "at least 2 models", append = FALSE )
 
 coor_comm_features<- f3_coor[f3_coor$name%in%comm_features, ]
-# coor_comm_features<- coor_comm_features[order(coor_comm_features$log2FC , decreasing = TRUE), ]
 coor_comm_features$RF_importance<- RF.imp.mean[comm_features, 3]
 coor_comm_features$SVM_coefs<-SVM.coef.mean[comm_features]
 write.xlsx(coor_comm_features , file=paste(Cancer, "/f4_features.xlsx", sep="")

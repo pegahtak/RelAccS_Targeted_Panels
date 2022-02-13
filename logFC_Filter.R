@@ -26,7 +26,7 @@ PBMC_counts<- my_coll(PBMC_counts , "PBMC")
 Neut_mean_ratio<- ((colMeans(set[cancerCaseID , ])+1)/(colMeans(Neutrophil_counts)+1) )
 PBMC_mean_ratio<- ((colMeans(set[cancerCaseID , ])+1)/(colMeans(PBMC_counts)+1) )
 
-### we assumed that cfDNA derived from Netrophils consist 2/3 of whole plasma cfDNA
+### we assumed that cfDNA derived from Netrophils make up 2/3 of whole plasma cfDNA
 blood_mean<-(2*(colMeans(Neutrophil_counts)+1) +(colMeans(PBMC_counts)+1)/3) 
 blood_ratio<- ((colMeans(set[cancerCaseID , ])+1) /blood_mean)
 
@@ -38,7 +38,7 @@ log2FC_PBMC<- log2(PBMC_mean_ratio)
 log2FC_blood<- log2(blood_ratio)
 
 ### filter1 
-if (Panel_Type=="Opne")
+if (Panel_Type=="Open")
  {
   f1.features<- (names(log2FC_blood))[ which(log2FC_blood >=1.5)]
  }else

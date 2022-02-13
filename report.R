@@ -8,31 +8,31 @@ suppressMessages(library(ROCR))
 report<- function( Cancer , cv ) ### cancer : cases[i] 
 {
   n=length(cv)### number of folds
-  system(paste("mkdir " , Cancer , "/cv" , sep=""))
+  system(paste0("mkdir " , Cancer,Panel_Type , "/cv" ))
   for ( j in 1: n ){
-    system(paste("mkdir " , Cancer , "/cv/Fold" , j , sep=""))
+    system(paste0("mkdir " , Cancer, Panel_Type , "/cv/Fold" , j ))
     
     fold=as.character(j)
     # rep=as.character(rep)
     
-    write.table(cv[[j]]$cmRF , paste( Cancer,"/cv/Fold",j ,"/cmRF.Fold" , fold , ".txt"  , sep="" )
+    write.table(cv[[j]]$cmRF , paste( Cancer,Panel_Type,"/cv/Fold",j ,"/cmRF.Fold" , fold , ".txt"  , sep="" )
                 , quote = FALSE )
-    write.table(cv[[j]]$cmSVM , paste( Cancer,"/cv/Fold",j,"/cmSVM.Fold" , fold , ".txt" , sep="" )
+    write.table(cv[[j]]$cmSVM , paste( Cancer,Panel_Type,"/cv/Fold",j,"/cmSVM.Fold" , fold , ".txt" , sep="" )
                 , quote = FALSE )
-    write.table(cv[[j]]$cmLASSO , paste (Cancer,"/cv/Fold",j,"/cmLASSO.Fold" , fold  ,".txt"  , sep="" )
+    write.table(cv[[j]]$cmLASSO , paste (Cancer,Panel_Type,"/cv/Fold",j,"/cmLASSO.Fold" , fold  ,".txt"  , sep="" )
                 , quote = FALSE )
-    write.table(cv[[j]]$cmBoost , paste (Cancer,"/cv/Fold",j,"/cmBoost.Fold" , fold  ,".txt"  , sep="" )
+    write.table(cv[[j]]$cmBoost , paste (Cancer,Panel_Type,"/cv/Fold",j,"/cmBoost.Fold" , fold  ,".txt"  , sep="" )
                 , quote = FALSE )
     
-    write.table(cv[[j]]$misclassRF  , paste( Cancer,"/cv/Fold", j,"/misclassifiedRF.Fold",fold  , ".txt" , sep="" ))
-    write.table(cv[[j]]$misclassifiedSVM  , paste( Cancer,"/cv/Fold", j,"/misclassifiedSVM.Fold",fold ,  ".txt" , sep="" ))
-    write.table(cv[[j]]$misclassifiedLASSO  , paste( Cancer,"/cv/Fold", j,"/misclassifiedLASSO.Fold",fold  , ".txt" , sep="" ))
-    write.table(cv[[j]]$MisclassifiedBoost  , paste( Cancer,"/cv/Fold", j,"/MisclassifiedBoost.Fold",fold  , ".txt" , sep="" ))
+    write.table(cv[[j]]$misclassRF  , paste( Cancer,Panel_Type,"/cv/Fold", j,"/misclassifiedRF.Fold",fold  , ".txt" , sep="" ))
+    write.table(cv[[j]]$misclassifiedSVM  , paste( Cancer,Panel_Type,"/cv/Fold", j,"/misclassifiedSVM.Fold",fold ,  ".txt" , sep="" ))
+    write.table(cv[[j]]$misclassifiedLASSO  , paste( Cancer,Panel_Type,"/cv/Fold", j,"/misclassifiedLASSO.Fold",fold  , ".txt" , sep="" ))
+    write.table(cv[[j]]$MisclassifiedBoost  , paste( Cancer,Panel_Type,"/cv/Fold", j,"/MisclassifiedBoost.Fold",fold  , ".txt" , sep="" ))
     
     
     suppressMessages(roc.RF<-roc(cv[[j]]$Y_test_fold  , cv[[j]]$votesRF[,2]))
     rf.p2<- performance(cv[[j]]$prr_RF,measure="tpr", x.measure="fpr" )
-    fileRF=paste( Cancer,"/cv/Fold", j,"/AUC.RF.Fold." , fold  , ".pdf" , sep="" )
+    fileRF=paste( Cancer,Panel_Type,"/cv/Fold", j,"/AUC.RF.Fold." , fold  , ".pdf" , sep="" )
     pdf(file=fileRF  ,width = 4 , height = 4 )
     plotRF<-plot(rf.p2,main=paste(Cancer , " vs. others",  "  fold" , fold," RF" , sep="")
                  ,col=1,lwd=4, cex.lab=1.5 , cex.main=1.1 , cex.lab=1.1)+
@@ -46,7 +46,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
     p1.svm<- prediction(cv[[j]]$probsSVM[, 2] , cv[[j]]$Y_test_fold)
     p2.svm<- performance(p1.svm,measure="tpr", x.measure="fpr" )
     suppressMessages(SVM.roc<- roc(cv[[j]]$Y_test_fold ,unlist(p1.svm@predictions) ))
-    fileSVM=paste( Cancer,"/cv/Fold", j,"/AUC.SVM.Fold" , fold , ".pdf" , sep="")
+    fileSVM=paste( Cancer,Panel_Type,"/cv/Fold", j,"/AUC.SVM.Fold" , fold , ".pdf" , sep="")
     pdf(file=fileSVM  ,width = 4 , height = 4 )
     plotSVM<- plot(p2.svm,main=paste(Cancer , " vs. others",  "  fold" , fold," SVM " , sep="")
                    ,col=1,lwd=4, cex.lab=1.1 , cex.main=1.1)+
@@ -59,7 +59,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
     l1<- prediction(cv[[j]]$LASSO.prr , cv[[j]]$Y_test_fold)
     l2<- performance(l1,measure="tpr", x.measure="fpr" )
     suppressMessages(LASSO.roc<- roc(cv[[j]]$Y_test_fold ,unlist(l1@predictions) ))
-    fileLASSO=paste( Cancer,"/cv/Fold", j,"/AUC.LASSO.Fold" , fold  , ".pdf" , sep="")
+    fileLASSO=paste( Cancer,Panel_Type,"/cv/Fold", j,"/AUC.LASSO.Fold" , fold  , ".pdf" , sep="")
     pdf(file=fileLASSO  ,width = 4 , height = 4 )
     plotLASSO<-plot(l2,main=paste(Cancer , " vs. others",  "  fold" , fold," LASSO " , sep="")
                     ,col=1,lwd=4, cex.lab=1.1 , cex.main=1.1)+
@@ -76,7 +76,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
     suppressMessages( Boost.roc<- roc(cv[[j]]$Y_test_fold , cv[[j]]$PredictBoost))
     b.p1<- prediction(cv[[j]]$PredictBoost , cv[[j]]$Y_test_fold )
     b.p2<- performance(b.p1,measure="tpr", x.measure="fpr" )
-    fileBoost<-paste( Cancer,"/cv/Fold", j,"/AUC.Boost.Fold" , fold  , ".pdf" , sep="")
+    fileBoost<-paste( Cancer,Panel_Type,"/cv/Fold", j,"/AUC.Boost.Fold" , fold  , ".pdf" , sep="")
     pdf(file=fileBoost  ,width = 4 , height = 4 )
     plotBoost<-plot(b.p2 ,main=paste(Cancer , " vs. others",  "  fold" , fold," Boosting " , sep="")
                     ,col=1,lwd=4, cex.lab=1.1 , cex.main=1.1)+
@@ -128,9 +128,10 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
   suppressMessages(Boost.roc<- roc(Y , predictBoost))
   
   ### AUC plots 
-  system(paste("mkdir " , Cancer , "/cv/over_all" , sep=""))
+  system(paste("mkdir " , Cancer, Panel_Type , "/cv/over_all" , sep=""))
+  
   #RF
-  file1=paste(  Cancer,"/cv/over_all/","AUC.RF" , ".pdf" , sep="" )
+  file1=paste(  Cancer, Panel_Type,"/cv/over_all/","AUC.RF" , ".pdf" , sep="" )
   pdf(file=file1  ,width = 5 , height = 5 )
   plotRF<-plot.roc(RF.roc,main=paste(Cancer , " vs. others",  " RF" , sep="")
                    ,col=1,lwd=4, cex.lab=1.5 , cex.main=1.1 , cex.lab=1.1)
@@ -140,7 +141,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
   dev.off()
   
   #Boosting
-  file4=paste(  Cancer,"/cv/over_all/","AUC.Boost" , ".pdf" , sep="" )
+  file4=paste(  Cancer, Panel_Type,"/cv/over_all/","AUC.Boost" , ".pdf" , sep="" )
   pdf(file=file4  ,width = 5 , height = 5 )
   plotBoost<-plot.roc(Boost.roc,main=paste(Cancer , " vs. others",  " Boosting" , sep="")
                       ,col=1,lwd=4, cex.lab=1.5 , cex.main=1.1 , cex.lab=1.1)
@@ -151,7 +152,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
   
   # SVM
   
-  file2=paste( Cancer,"/cv/over_all/","AUC.SVM" , ".pdf" , sep="" )
+  file2=paste( Cancer, Panel_Type,"/cv/over_all/","AUC.SVM" , ".pdf" , sep="" )
   pdf(file=file2  ,width = 5 , height = 5 )
   plotSVM<-plot(SVM.roc,main=paste(Cancer , " vs. others",  " SVM" , sep="")
                 ,col=1,lwd=4, cex.lab=1.5 , cex.main=1.1 , cex.lab=1.1 )
@@ -162,7 +163,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
   
   ###  LASSO 
   
-  file3=paste( Cancer,"/cv/over_all/","AUC.LASSO" , ".pdf" , sep="" )
+  file3=paste( Cancer, Panel_Type,"/cv/over_all/","AUC.LASSO" , ".pdf" , sep="" )
   pdf(file=file3  ,width = 5 , height = 5 )
   plotLASSO<-plot(l2,main=paste(Cancer , " vs. others",  " LASSO" , sep="")
                   ,col=1,lwd=4, cex.lab=1.5 , cex.main=1.1 , cex.lab=1.1  
@@ -182,7 +183,7 @@ report<- function( Cancer , cv ) ### cancer : cases[i]
   sensi<- c(se.rf[2] , se.svm[2], se.la[2])
   sensi<-matrix(sensi , ncol = 3)
   colnames(sensi)<- c("RF" , "SVM" , "LASSO")
-  write.table(sensi , paste0(Cancer, "/sensitivites.txt") , sep = "\t" , quote = F , row.names = F)
+  write.table(sensi , paste0(Cancer,Panel_Type, "/sensitivites_overall.txt") , sep = "\t" , quote = F , row.names = F)
   
   return(out)
 }

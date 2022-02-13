@@ -41,26 +41,26 @@ ROC_all<- function(cv)
   all_LASSO<- rbind(res_LASSO , all_LASSO)
   
   #svm
-  pdf(paste0(Cancer, "/svmROC.pdf"))
+  pdf(paste0(Cancer, Panel_Type, "/svmROC.pdf"))
   rocplot(all_svm,main=paste0("roc plot " ,Cancer , " 5 fold cv" )  )
   dev.off()
   graphics.off()
   
   #RF
-  pdf(paste0(Cancer, "/rfROC.pdf"))
+  pdf(paste0(Cancer, Panel_Type, "/rfROC.pdf"))
   rocplot(all_RF,main=paste0("roc plot " ,Cancer , " 5 fold cv" )  )
   dev.off()
   graphics.off()
   
   #LASSO
-  pdf(paste0(Cancer, "/lassoROC.pdf"))
+  pdf(paste0(Cancer, Panel_Type, "/lassoROC.pdf"))
   rocplot(all_LASSO,main=paste0("roc plot " ,Cancer , " 5 fold cv" )  )
   dev.off()
   graphics.off()
   
   #total
   total<- rbind(avg_svm , avg_RF , avg_LASSO)
-  pdf(paste0(Cancer, "/total_ROC.pdf"))
+  pdf(paste0(Cancer, Panel_Type, "/total_ROC.pdf"))
   rocplot(total,main=paste0("roc plot " ,Cancer , " 5 fold cv" )  )
   dev.off()
   graphics.off()

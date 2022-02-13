@@ -104,7 +104,15 @@ for (  i in 1:length(cases))
       Cancer_response[which(cancerTypes== "LUAD")] <- 1
       Cancer_response[which(cancerTypes== "LUSC")] <- 1
     }else
-
+      if( cases[i]=="BRCA")
+      {
+        
+        Cancer_response[which(cancerTypes=="BRCA_Basal")]<-1
+        Cancer_response[which(cancerTypes=="BRCA_LumB")]<-1
+        Cancer_response[which(cancerTypes=="BRCA_LumA")]<-1
+        Cancer_response[which(cancerTypes=="BRCA_Her2")]<-1
+        Cancer_response[which(cancerTypes=="BRCA")]<-1
+      }else
         Cancer_response[which(cancerTypes== cases[i])] <- 1
   
   

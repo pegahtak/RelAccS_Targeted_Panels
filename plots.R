@@ -80,7 +80,7 @@ bk <- c(-100,seq(0,100,by=10))
 mycols <- c("red",colorRampPalette(colors = c("white","blue"))(length(bk)-2))
 
 par(mar=c( 1, 1, 1, 1))
-pdf(file=paste( Cancer , "/heatmap_main.pdf" , sep="") , width = 30 , height = 20)
+pdf(file=paste( Cancer,Panel_Type, "/heatmap_main.pdf" , sep="") , width = 30 , height = 20)
 heatmap.3(heatmap_data ,col=coul   , key=TRUE , keysize=0.5 , scale = "row"
           , Rowv = FALSE , Colv = TRUE , dendrogram="column"
           ,density.info="none", trace="none",labCol=FALSE , labRow = FALSE  ,cexRow=0.8, ColSideColors =clab
@@ -146,7 +146,7 @@ boxplot_data$peak_name<- factor(boxplot_data$peak_name , levels = f4_coor$name)
 boxplot_data$cellType<- factor(boxplot_data$cellType , levels = c("blood" , Cancer , "other Cancers"))
 suppressMessages(library(ggplot2))
 par(mar=c(1, 1, 1, 1))
-pdf(file=paste(Cancer , "/",Cancer,  ".boxplot.pdf" , sep = "") , width = 100 , height = 70)
+pdf(file=paste(Cancer, Panel_Type, "/",Cancer,  ".boxplot.pdf" , sep = "") , width = 100 , height = 70)
 boxplt<- ggplot(boxplot_data , aes(x= peak_name , y=counts  , fill=cellType )    , col )+ggtitle(Cancer)+
   theme(plot.title = element_text(face = "bold" , size= 90) , axis.text.x = element_text(angle = 90 , size = 90  , face="bold" ),axis.title.x = element_text(size = 200)
         ,axis.title.y = element_text(size = 130) , legend.key.size = unit(20, "cm") , axis.text.y = element_text( size= 90)

@@ -14,11 +14,11 @@ loadBlood<- function()
   rownames(Neutrophil_counts1)<- Pan_peaks$name
   rownames(PBMC_counts1)<- Pan_peaks$name
  
-  # normalize to library size
-  Neut_library_size<- read.table("data/Neutrophil/dedup_reads.txt" , header = T)
-  PBMC_library_size<- read.table("data/PBMC/dedup_reads.txt" , header = T)
-  Neutrophil_counts1<- (Neutrophil_counts1/as.numeric(Neut_library_size$reads))
-  PBMC_counts1<- (PBMC_counts1/as.numeric(PBMC_library_size$reads))
+  # # normalize to library size
+  # Neut_library_size<- read.table("data/Neutrophil/dedup_reads.txt" , header = T)
+  # PBMC_library_size<- read.table("data/PBMC/dedup_reads.txt" , header = T)
+  # Neutrophil_counts1<- (Neutrophil_counts1/as.numeric(Neut_library_size$reads))
+  # PBMC_counts1<- (PBMC_counts1/as.numeric(PBMC_library_size$reads))
   
   blood_counts1<- cbind(Neutrophil_counts1,PBMC_counts1)
   rownames(blood_counts1)<- rownames(Neutrophil_counts1)

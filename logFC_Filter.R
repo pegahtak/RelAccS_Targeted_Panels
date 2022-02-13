@@ -38,7 +38,11 @@ log2FC_PBMC<- log2(PBMC_mean_ratio)
 log2FC_blood<- log2(blood_ratio)
 
 ### filter1 
-f1.features<- (names(log2FC_blood))[ which(log2FC_blood >=1.5)]
+if (Panel_Type=="Opne")
+ {
+  f1.features<- (names(log2FC_blood))[ which(log2FC_blood >=1.5)]
+ }else
+   f1.features<- (names(log2FC_blood))[ which(log2FC_blood <= -1.5)]
 
 
 ### get features coordinates
@@ -64,8 +68,8 @@ f1_coor$mean_ratio_PBMC<- PBMC_mean_ratio[f1.features]
 f1_coor$mean_ratio_blood<- blood_ratio[f1.features]
 f1_coor$log2FC_blood<- log2FC_blood[ f1.features]
 
-write.table(f1_coor , paste(Cancer, "/f1_features.txt" , sep=""), quote = FALSE)
-write.xlsx(f1_coor , file=paste(Cancer , "/f1_features.xlsx" , sep="")
+write.table(f1_coor , paste(Cancer, Panel_Type,"/f1_features.txt" , sep=""), quote = FALSE)
+write.xlsx(f1_coor , file=paste(Cancer,Panel_Type , "/f1_features.xlsx" , sep="")
           , append = FALSE , row.names = F)
 
 set <- set[ , f1.features]

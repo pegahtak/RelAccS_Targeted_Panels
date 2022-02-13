@@ -27,6 +27,8 @@ for ( j in 1:length(cancerGroups))
 
 cases<- c("BRCA", "COAD", "KIDNEY", "LIHC" ,"LUNG" , "PRAD", "STAD" )
 
+Panel_Type="Open"
+###open panels
 for (  i in 1:length(cases))
 {
  
@@ -70,6 +72,7 @@ for (  i in 1:length(cases))
   ind_id<- which(colnames(set)=="id")
   
   system(paste( "mkdir " , Cancer , sep=""))
+  system(paste0( "mkdir " , Cancer , Panel_Type))
   source("logFC_Filter.R")
   source("bloodFilter.R")
   source("DiffBind.R")  
@@ -80,3 +83,50 @@ for (  i in 1:length(cases))
  
 }
 
+### closed Panels
+Panel_Type="Closed"
+for (  i in 1:length(cases))
+{
+  
+  set=as.data.frame(n.set)
+  ### choose cancer Type ( choose i )
+  Cancer=cases[i]
+  Cancer_response<-rep(0 , nrow(set))
+  
+  print(paste("*********", Cancer, "*******"))
+  if(cases[i]=="KIDNEY")
+  {Cancer_response[which(cancerTypes== "KIRP")] <- 1
+  Cancer_response[which(cancerTypes== "KIRC")] <- 1
+  } else
+    
+    if(cases[i]=="LUNG")
+    {
+      Cancer_response[which(cancerTypes== "LUAD")] <- 1
+      Cancer_response[which(cancerTypes== "LUSC")] <- 1
+    }else
+
+        Cancer_response[which(cancerTypes== cases[i])] <- 1
+  
+  
+  
+  cancerCaseID<- which(Cancer_response==1)
+  conrtolID<- setdiff(seq(from=1 , to=nrow(set) , by=1 ) ,cancerCaseID )
+  
+  
+  set$response<- Cancer_response
+  set$response<- factor(set$response , levels = c(0 , 1))
+  ind_response<- which(colnames(set)=="response")
+  set$id<- IDs
+  ind_id<- which(colnames(set)=="id")
+  
+  
+  system(paste0( "mkdir " , Cancer , Panel_Type))
+  source("logFC_Filter.R")
+  source("bloodFilter.R")
+  source("DiffBind.R")  
+  source("classification.R")
+  source("ROC_overall.R")
+  ROC_all(cv)
+  source("plots.R")
+  
+}

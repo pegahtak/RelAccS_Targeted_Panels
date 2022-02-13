@@ -1,5 +1,5 @@
 ### report  repeated k fold cv results 
-### report cm , accuracy , misclassifed , AUC
+### report cm , accuracy , misclassified , AUC
 suppressMessages(library(dplyr))
 suppressMessages(library(pROC))
 suppressMessages(library(plotROC))

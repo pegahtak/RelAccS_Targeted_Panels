@@ -1,0 +1,213 @@
+#### count depth of regions in bam file
+
+$ samtools bedcov coad_newhg19.bed IC05.bam > coad_lung.csv
+
+
+### count insert size of target regions in bam file
+
+$  samtools view -b -L open_control.bed ~/cfDNA/samples/shendure/bamfiles/IC20.bam > lusc_open_con.bam
+$  java -jar ~/cfDNA/samples/shendure/result/final_results/closed/picard.jar CollectInsertSizeMetrics I= lusc_open_con.bam O= lusc-open_con_fl_insert_size_metrics.txt H= lusc_open_con_fl_insert_size_histogram.pdf M=0.5
+
+
+### sort bed file
+
+$ bedtools sort -i low_hg19.bed > low_hg19_sorted.bed
+
+### count fragment length of target regions in bam file
+
+# this analysis was done by using ctDNAtools R package
+
+> library(ctDNAtools)
+> IH03_fh <- get_fragment_size("IH03.bam",  targets = "high_sorted.bed")
+
+######### preprocessing the obtained files for visualization 
+
+################### scatter plot ####################
+######### using depth and fragment length count of the related regions in healthy cfDNA WGS ####################
+scat_l <- read.csv("scatter_low.csv", header = T)
+scat_h <- read.csv("scatter_high.csv", header = T)
+scat_c <- read.csv("scatter_closed.csv", header= T)   
+
+scat <-  bind_rows(scat_l, scat_h)
+head(scat)
+#names(scat) <- scat[1,]
+write.csv(scat, file = "scat.csv")
+
+################## using ATAC_Seq derived counts for the related regions in PBMC ######################
+blood <- read.table("high_low_closed_counts.txt", header = T)
+head(blood)
+dim(blood)
+blood_filt <- blood[,c(1,11)]
+head(blood_filt)
+colnames(blood_filt)[1] <- "region"
+write.csv(blood_filt, file = "blood_filt.csv")
+library(plyr)
+
+IH01_scat_depth <- join(scat, blood_filt, type = "inner") 
+head(IH01_scat_depth)
+IH01_scat_depth$count <- log(IH01_scat_depth[,2]+1)
+colnames(IH01_scat_depth)[2] <- "depth_IH02"
+scatp <-ggplot(IH01_scat_depth, aes(x=depth_IH02, y=median_blood)) + 
+  geom_point()+
+  geom_smooth(method=lm)+ ggtitle("scatter plot of depth(cfDNA vs ATAC-seq)_IH02")
+scatp+stat_cor(method = "pearson", label.x = 3, label.y = 60)
+
+
+  sp <- ggscatter(IH01_scat_depth, x = "depth_IH02", y = "median_blood",
+                add = "reg.line",  # Add regressin line
+                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+                conf.int = TRUE # Add confidence interval
+)
+
+sp
+sp + stat_cor(method = "pearson", label.x = 3, label.y = 60)
+  
+######################################## boxplots in R ###############################
+library(ggplot2)
+library(reshape2)
+library(ggforce)
+library(gg.gap)
+library( ggpubr )
+library(dplyr)
+library(magrittr)
+#FL_high <- read.csv("FL_high_IH03.csv", header = T)
+#barplot(FL_high$count)
+
+low <- read.csv("low.csv", header = T)
+high <- read.csv("high.csv", header =T) 
+closed <- read.csv("closed.csv", header = T)
+l <- low[,c(1,4)]
+h <- high[,c(1,4)]
+c <- closed[,c(1,4)]
+colnames(l)[2] <- "low"
+colnames(h)[2] <- "high"
+colnames(c)[2] <- "closed"
+head(c)
+c$chr <- paste("chr", c$chr,".closed", sep = "")
+l$chr <- paste("chr", l$chr,".low", sep = "")
+h$chr <- paste("chr", h$chr,".high", sep = "")
+
+##################test
+head(low)
+l_r <- paste(low$chr,low$start,low$end, sep = ".")
+head(l_r)
+
+cl <- merge(c, l, all= T) 
+clh <- merge(cl,h,all = T)
+clh[is.na(clh)] <- 0
+head(clh)
+
+
+
+
+lo <- clh$low
+hi <- clh$high
+cl <- clh$closed
+boxplot(lo,hi, cl,
+        main = "length in IH01_DSP_Cov;104.92",
+        at = c(1,2,3),
+        names = c("low", "high", "closed"),
+        las = 2,
+        col = c("orange","red"),
+        border = "brown",
+        horizontal = TRUE,
+        notch = TRUE
+)
+
+
+
+df<- clh %>% sample_frac(0.33)
+#dim(clh)
+df.bar <- melt(df, id.var = "chr")
+colnames(df.bar)[1] <- "regions"
+
+
+df.bar$value <- log(df.bar[,3]+1)
+P1 <-ggplot(df.bar, aes(x=variable, y=value, group=variable, color = variable)) +
+  geom_boxplot( fill="skyblue", notch=FALSE) + scale_y_continuous(limits = c(5,17), expand = c(0,0), breaks = c(5, 10:20), labels = c(0, 10:20))+
+  ggtitle("length in IH01_DSP_Cov;104.92") + xlab("Region Type") + ylab("length_log scale")+ labs(fill = "Region Type")+theme(plot.margin = unit(c(1,1,1,1), "cm"), axis.title.x = element_text(size = 17),
+                                                                                                                            axis.text.x = element_text(size = 17),
+                                                                                                                             axis.title.y = element_text(size = 17))
+p <- P1 +  geom_violin(scale="count") + geom_boxplot(fill="white", width=0.2, alpha=0.3)
+d <- compare_means(value~variable, df.bar, method = "t.test")
+d %<>% mutate(y_pos = c(15,13,12),labels = ifelse(p<0.15,p.format,p.signif))
+p +geom_signif(textsize=6, tip_length = 0.01, 
+               xmin=d$group1, xmax=d$group2, annotations=d$labels, y_position=d$y_pos)
+
+################################### dotplot for length distribution analysis ##########################
+op <- read.table("coad_open.txt", header = T)
+cl <-read.table("coad_closed.txt", header = T)
+op_h <- read.table("coad_openinIH02.txt", header = T)       
+cl_h <- read.table("coad_closedinIH02.txt",header = T)
+
+head(op)
+colnames(op)[2] <- "COAD Open panel"
+colnames(cl)[2] <- "COAD Close Panel"
+colnames(op_h)[2] <- "COAD Open panelin Healthy"
+colnames(cl_h)[2] <- "COAD close panelin Healthy"
+
+
+library(ggplot2)
+library(reshape2)
+library(ggforce)
+library(gg.gap)
+library( ggpubr )
+library(dplyr)
+library(magrittr)
+
+library(ggplot2)
+library(hrbrthemes)
+library(dplyr)
+library(tidyr)
+library(viridis)
+
+
+
+opcl <- merge(op, cl, all= T) 
+opclop_h <- merge(opcl, op_h, all= T) 
+opclop_hcl_h <- merge(opclop_h,cl_h, all = T)
+head(opclop_hcl_h)
+colnames(opclop_hcl_h)[1] <- "length"
+
+opclop_hcl_h[is.na(opclop_hcl_h)] <- 0
+
+df.bar <- melt(opclop_hcl_h, id.var = "length")
+head(df.bar)
+
+p2 <- ggplot(data=df.bar, aes(x=length, group=variable, fill=variable)) +
+  geom_density(adjust=1.5, alpha=.4) +
+  theme_ipsum()
+
+ggplot(df.bar,aes(x=length, fill=variable)) + geom_density(alpha=0.25)
+ggplot(df.bar,aes(x=length, fill=variable)) + geom_histogram(alpha=0.25)
+
+
+ggplot(data,aes(x=L1, y=value, fill=L1)) + geom_boxplot()
+
+p <- ggdotchart(df.bar, x = "value", y ="length",
+           color = "variable", palette = "jco", size = 1, 
+           add = "segment", 
+           add.params = list(color = "lightgray", size = 0.1),
+           position = position_dodge(0.3),
+           ggtheme = theme_pubclean(),
+           rotate = T
+)
+
+plot(p)
+
+##########################################
+##########################################
+
+###################################### somatic variant calling #####################
+# this pipeline was applied twice( one for tissue and the other for cfDNA samples of prostate cancer data-set)
+
+1- QC with Fastqc
+2- Map to refrence with bwa          $bwa mem -M -K 100000000 -p ~/Downloads/cromwell/hg38/Homo_sapiens_assembly38.fasta tissue.1.fastq.gz tissue.2.fastq.gz > tissue.sam
+3- Convert sam to bam               $samtools view -S -b tissue.sam > tissue.bam
+4- Add read groups to bam file      $ java -jar picard.jar  AddOrReplaceReadGroups I=tissue.bam O=tissue_RG.bam RGID=4 RGLB=twist RGPL=illumina RGPU=unit1 RGSM=tissue
+5- Sort bam file                    $java -jar picard.jar SortSam I=tissue_RG.bam O=tissue_RG_sorted.bam SORT_ORDER=coordinate
+6- Validate sortedbam file          $java -jar ~/Downloads/cromwell/WES_analysis/tissue/picard.jar ValidateSamFile I=tissue_RG_sorted.bam MODE=SUMMARY
+7- Index sortedbam file 	    $ java -jar picard.jar BuildBamIndex I=tissue_RG_sorted.bam
+8- Mark duplicates                  $java -jar picard.jar MarkDuplicates I=tissue_RG_sorted.bam O=tissue_marked_duplicates.bam M=tissuemarked_dup_metrics.tx
+9- Index marked_duplicates.bam file $java -jar picard.jar BuildBamIndex I=tissue_marked_duplicates.bam
+10 Call somatic variants            $java -jar gatk_local.jar Mutect2 -R ~/Downloads/cromwell/hg38/Homo_sapiens_assembly38.fasta -I tissue_marked_duplicates.bam -I normal_marked_duplicates.bam -tumor s1_tumor -normal s1_normal -O tissue_somatic_m2.vcf.gz -bamout tumor_normal_m2.bam

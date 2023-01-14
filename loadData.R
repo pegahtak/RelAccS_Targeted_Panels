@@ -8,7 +8,7 @@ data<- readRDS("data/TCGA-ATAC_PanCan_Raw_Counts.rds")
 data<- data[ , -1:-7]
 raw_data<- t(data)
 
-sequencing_stat<- read_excel("TCGA-ATAC_DataS1_DonorsAndStats_v4.xlsx" , sheet = 3)
+sequencing_stat<- read_excel("data/TCGA-ATAC_DataS1_DonorsAndStats_v4.xlsx" , sheet = 3)
 colnames(sequencing_stat)<- sequencing_stat[37, ]
 sequencing_stat<- sequencing_stat[ -1:-37, ]
 

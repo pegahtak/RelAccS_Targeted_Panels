@@ -4,7 +4,7 @@ library(purrr)
 ### read TCGA pan caner data set 
 ### obtained form https://gdc.cancer.gov/about-data/publications/ATACseq-AWG
 ### download link: https://api.gdc.cancer.gov/data/d6e5358d-491c-4776-8043-b5e49b96706e
-data<- readRDS("data/TCGA_panCancer.rds") 
+data<- readRDS("data/TCGA-ATAC_PanCan_Raw_Counts.rds")  
 data<- data[ , -1:-7]
 raw_data<- t(data)
 

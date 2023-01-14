@@ -12,7 +12,7 @@ sequencing_stat<- read_excel("TCGA-ATAC_DataS1_DonorsAndStats_v4.xlsx" , sheet =
 colnames(sequencing_stat)<- sequencing_stat[37, ]
 sequencing_stat<- sequencing_stat[ -1:-37, ]
 
-### normalize to total library size
+### normalize to total library size (counts per million)
 data<- 1000000*(data/ as.numeric(sequencing_stat$Final_DeDup_reads))
 
 ### collapse technical replicates

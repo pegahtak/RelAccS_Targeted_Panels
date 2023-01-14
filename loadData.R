@@ -13,7 +13,8 @@ colnames(sequencing_stat)<- sequencing_stat[37, ]
 sequencing_stat<- sequencing_stat[ -1:-37, ]
 
 ### normalize to total library size (counts per million)
-data<- 1000000*(data/ as.numeric(sequencing_stat$Final_DeDup_reads))
+for ( i in 1: ncol(data))
+  data[,i]<- (data[ , i]/ sum(data[,i]))*1000000
 
 ### collapse technical replicates
 s_names<- map(strsplit(colnames(data) , split = "_L" ),1)
